@@ -4,19 +4,26 @@ using SFML.System;
 
 namespace AeroHockey.Core;
 
-class Ball
+internal class Ball
 {
-	public Shape shape;
 	public Vector2f position;
+
+	private readonly uint radius = 10;
+	private Random random = new();
+	public CircleShape shape;
 	public Vector2f velocity;
 
-	private uint radius = 10;
 	public Ball(float x, float y)
 	{
-		shape = new CircleShape(radius);
-		shape.FillColor = Color.White;
 		position = new Vector2f(x, y);
-		shape.Position = position;
+
+		shape = new CircleShape(radius)
+		{
+			Position = position,
+			Origin = new Vector2f(radius, radius),
+			FillColor = Color.Blue
+		};
+
 		velocity = new Vector2f(5, 5);
 	}
 
@@ -24,15 +31,14 @@ class Ball
 	{
 		position += velocity;
 
-		if (position.X < 0 || position.X > Config.WindowWidth)
-		{
-			velocity.X = -velocity.X;
-		}
+		if (position.X < radius || position.X > Config.WindowWidth) velocity.X = -velocity.X;
 
-		if (position.Y < 0 || position.Y > Config.WindowHeight)
-		{
-			velocity.Y = -velocity.Y;
-		}
+		if (position.Y < radius || position.Y > Config.WindowHeight) velocity.Y = -velocity.Y * 1.02f;
+
+
+		if (position.Y > Config.WindowHeight)
+			position.Y = Config.WindowHeight;
+		else if (position.Y < 0) position.Y = 0;
 
 		shape.Position = position;
 	}

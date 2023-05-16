@@ -1,5 +1,7 @@
 ﻿using AeroHockey.Core;
-using AeroHockey.Settings;
+using AeroHockey.Core.Types;
 
-Game game = new Game(Config.WindowWidth, Config.WindowHeight, "Aero Hockey");
-game.Run();
+var @params = new GameLaunchParams ();
+
+var game = new Game(@params);
+game.Run ();
