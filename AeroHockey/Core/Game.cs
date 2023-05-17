@@ -2,6 +2,7 @@
 using AeroHockey.Input;
 using AeroHockey.Settings;
 using SFML.Graphics;
+using SFML.System;
 using SFML.Window;
 
 namespace AeroHockey.Core;
@@ -12,6 +13,8 @@ internal class Game
 	private readonly Player bot;
 	private readonly Player player;
 	private readonly RenderWindow window;
+	
+	private readonly Shape[] walls = new Shape[4];
 
 	public Game(GameLaunchParams @params)
 	{
@@ -23,13 +26,19 @@ internal class Game
 		
 		player = new Core.Types.Player(
 			@params.Width / 4, 
-			@params.Height - Config.PlayerHeight - 30, 
+			@params.Height - Config.PlayerHeight - 40, 
 			new PlayerInput ());
 		
 		bot = new Core.Types.Player(
 			@params.Width * 3 / 4 - Config.PlayerWidth, 
-			30, 
+			40, 
 			new BotInput ());
+
+		walls[0] = new RectangleShape(new Vector2f(@params.Width, 10));
+		walls[1] = new RectangleShape(new Vector2f(@params.Width, 10));
+		walls[2] = new RectangleShape(new Vector2f(10, @params.Height));
+		walls[3] = new RectangleShape(new Vector2f(10, @params.Height));
+		
 	}
 
 	public void Run()
@@ -66,6 +75,32 @@ internal class Game
 			if (ball.shape.Position.Y < ball.shape.Radius)
 				player.AddScore ();
 			else if (ball.shape.Position.Y > window.Size.Y - ball.shape.Radius) bot.AddScore ();
+			
+			for (int i = 0; i < walls.Length; i++)
+			{
+				walls[i].FillColor = Color.Yellow;
+				walls[i].Position = new Vector2f(0, 0);
+				
+				switch (i)
+				{
+					case 0:
+						walls[i].Position = new Vector2f(0, window.Size.Y - 10);
+						break;
+					case 1:
+						walls[i].Position = new Vector2f(0, 0);
+						break;
+					case 2:
+						walls[i].Position = new Vector2f(0, 0);
+						walls[i].FillColor = Color.Red;
+						break;
+					case 3:
+						walls[i].Position = new Vector2f(window.Size.X - 10, 0);
+						walls[i].FillColor = Color.Red;
+						break;
+				}
+				
+				window.Draw(walls[i]);
+			}
 
 			window.Display ();
 		}
