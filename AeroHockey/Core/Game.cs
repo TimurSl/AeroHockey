@@ -1,5 +1,7 @@
-﻿using AeroHockey.Core.Types;
+﻿using AeroHockey.Core.Interfaces;
+using AeroHockey.Core.Types;
 using AeroHockey.Input;
+using AeroHockey.Objects;
 using AeroHockey.Settings;
 using SFML.Graphics;
 using SFML.System;
@@ -13,8 +15,10 @@ internal class Game
 	private readonly Player bot;
 	private readonly Player player;
 	private readonly RenderWindow window;
-	
-	private readonly Shape[] walls = new Shape[4];
+	private readonly Random random = new();
+
+	private List<IDrawable?> drawables = new();
+	private List<IUpdatable?> updatables = new();
 
 	public Game(GameLaunchParams @params)
 	{
@@ -23,22 +27,20 @@ internal class Game
 		window.SetFramerateLimit(60);
 
 		ball = new Ball(@params.Width / 2, @params.Height / 2);
-		
-		player = new Core.Types.Player(
-			@params.Width / 4, 
-			@params.Height - Config.PlayerHeight - 40, 
-			new PlayerInput ());
-		
-		bot = new Core.Types.Player(
-			@params.Width * 3 / 4 - Config.PlayerWidth, 
-			40, 
-			new BotInput ());
 
-		walls[0] = new RectangleShape(new Vector2f(@params.Width, 10));
-		walls[1] = new RectangleShape(new Vector2f(@params.Width, 10));
-		walls[2] = new RectangleShape(new Vector2f(10, @params.Height));
-		walls[3] = new RectangleShape(new Vector2f(10, @params.Height));
+		player = new Player(@params.Width / 4, @params.Height - Config.PlayerHeight - 40, new PlayerInput ());
+		bot = new Player(@params.Width * 3 / 4 - Config.PlayerWidth, 40, new BotInput ());
 		
+		CreateObject(player, player);
+		CreateObject(bot, bot);
+		CreateObject(ball, ball);
+
+		Direction[] directions = { Direction.Up, Direction.Down };
+		
+		for (var i = 0; i < directions.Length; i++)
+		{
+			CreateObject(new Wall(directions[i]));
+		}
 	}
 
 	public void Run()
@@ -48,60 +50,35 @@ internal class Game
 		{
 			window.DispatchEvents ();
 			window.Clear(Color.Black);
-
-			ball.Draw(window, RenderStates.Default);
-			ball.Update ();
-
-			player.Draw(window, RenderStates.Default);
-			player.Update (ball.position);
-
-			bot.Draw(window, RenderStates.Default);
-			bot.Update(ball.position);
-
-			if (CheckCollision(ball.shape, player.Shape))
-			{
-				ball.velocity.Y = -ball.velocity.Y;
-				ball.position.Y = player.Position.Y - ball.shape.Radius;
-				ball.velocity.X = (ball.position.X - player.Position.X) / 10;
-			}
-
-			if (CheckCollision(ball.shape, bot.Shape))
-			{
-				ball.velocity.Y = -ball.velocity.Y;
-				ball.position.Y = bot.Position.Y + Config.PlayerHeight + ball.shape.Radius;
-				ball.velocity.X = (ball.position.X - bot.Position.X) / 10;
-			}
-
-			if (ball.shape.Position.Y < ball.shape.Radius)
-				player.AddScore ();
-			else if (ball.shape.Position.Y > window.Size.Y - ball.shape.Radius) bot.AddScore ();
 			
-			for (int i = 0; i < walls.Length; i++)
+			DrawObjects ();
+			UpdateObjects ();
+			
+			if (CheckCollision(ball.Shape, player.Shape))
 			{
-				walls[i].FillColor = Color.Yellow;
-				walls[i].Position = new Vector2f(0, 0);
-				
-				switch (i)
-				{
-					case 0:
-						walls[i].Position = new Vector2f(0, window.Size.Y - 10);
-						break;
-					case 1:
-						walls[i].Position = new Vector2f(0, 0);
-						break;
-					case 2:
-						walls[i].Position = new Vector2f(0, 0);
-						walls[i].FillColor = Color.Red;
-						break;
-					case 3:
-						walls[i].Position = new Vector2f(window.Size.X - 10, 0);
-						walls[i].FillColor = Color.Red;
-						break;
-				}
-				
-				window.Draw(walls[i]);
+				ball.Velocity.Y = -ball.Velocity.Y;
+				ball.Position.Y = player.Position.Y - ball.radius;
+				ball.Velocity.X = (ball.Position.X - player.Position.X) / 10;
 			}
 
+			if (CheckCollision(ball.Shape, bot.Shape))
+			{
+				ball.Velocity.Y = -ball.Velocity.Y;
+				ball.Position.Y = bot.Position.Y + Config.PlayerHeight + ball.radius;
+				ball.Velocity.X = (ball.Position.X - bot.Position.X) / 10;
+			}
+
+			if (ball.Shape.Position.Y < ball.radius)
+			{
+				player.AddScore ();
+				RespawnBall (1);
+			}
+			else if (ball.Shape.Position.Y > window.Size.Y - ball.radius)
+			{
+				bot.AddScore ();
+				RespawnBall (-1);
+			}
+			
 			window.Display ();
 		}
 	}
@@ -113,4 +90,39 @@ internal class Game
 
 		return rect1.Intersects(rect2);
 	}
+	
+	private void CreateObject(IDrawable? drawable = null, IUpdatable? updatable = null)
+	{
+		if (drawable != null)
+			drawables.Add(drawable);
+		
+		if (updatable != null)
+			updatables.Add(updatable);
+	}
+	
+	private void DrawObjects()
+	{
+		foreach (var drawable in drawables)
+		{
+			drawable?.Draw(window);
+		}
+	}
+	
+	private void UpdateObjects()
+	{
+		foreach (var updatable in updatables)
+		{
+			updatable?.Update();
+			updatable?.Update(ball.Position);
+		}
+	}
+	
+	private void RespawnBall(int yVelocity = 0)
+	{
+		int x = random.Next(-10, 10);
+
+		ball.Position = new Vector2f(window.Size.X / 2, window.Size.Y / 2);
+		ball.Velocity = new Vector2f(x, yVelocity * 5);
+	}
+	
 }
