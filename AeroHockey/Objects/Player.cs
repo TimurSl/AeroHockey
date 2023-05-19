@@ -1,5 +1,6 @@
 ﻿using AeroHockey.Core.Interfaces;
 using AeroHockey.Input;
+using AeroHockey.Input.Interfaces;
 using AeroHockey.Settings;
 using SFML.Graphics;
 using SFML.System;

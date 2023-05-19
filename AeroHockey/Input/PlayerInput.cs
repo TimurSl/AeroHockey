@@ -1,4 +1,5 @@
-﻿using AeroHockey.Settings;
+﻿using AeroHockey.Input.Interfaces;
+using AeroHockey.Settings;
 using SFML.System;
 using SFML.Window;
 
@@ -6,7 +7,7 @@ namespace AeroHockey.Input;
 
 public class PlayerInput : IInput
 {
-	public float Speed = 5f;
+	public float Speed = 7f;
 	
 	public Vector2f GetMovement(Vector2f position, Vector2f ballPosition)
 	{
@@ -23,13 +24,14 @@ public class PlayerInput : IInput
 		else if (Keyboard.IsKeyPressed(Keyboard.Key.Up))
 		{
 			velocity.Y = -Speed;
-			if (position.Y < Config.WindowHeight * 0.5f) position.Y = Config.WindowHeight * 0.5f;
+			if (position.Y < Config.WindowHeight * 0.5f) 
+				position.Y = Config.WindowHeight * 0.5f;
 		}
 		else if (Keyboard.IsKeyPressed(Keyboard.Key.Down))
 		{
 			velocity.Y = Speed;
-			if (position.Y > Config.WindowHeight - Config.PlayerHeight)
-				position.Y = Config.WindowHeight - Config.PlayerHeight;
+			if (position.Y > Config.WindowHeight - Config.PlayerHeight - 20)
+				position.Y = Config.WindowHeight - Config.PlayerHeight - 20;
 		}
 
 		position += velocity;

@@ -16,7 +16,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Resource Include="Fonts\arial.ttf" />
+      <EmbeddedResource Include="Fonts\arial.ttf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </EmbeddedResource>
     </ItemGroup>
 
 </Project>

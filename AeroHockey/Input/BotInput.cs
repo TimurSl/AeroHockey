@@ -1,4 +1,5 @@
-﻿using AeroHockey.Settings;
+﻿using AeroHockey.Input.Interfaces;
+using AeroHockey.Settings;
 using SFML.System;
 
 namespace AeroHockey.Input;

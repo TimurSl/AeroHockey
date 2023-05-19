@@ -1,6 +1,6 @@
 ﻿using SFML.System;
 
-namespace AeroHockey.Input;
+namespace AeroHockey.Input.Interfaces;
 
 public interface IInput
 {

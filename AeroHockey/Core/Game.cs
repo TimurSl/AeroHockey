@@ -28,8 +28,8 @@ internal class Game
 
 		ball = new Ball(@params.Width / 2, @params.Height / 2);
 
-		player = new Player(@params.Width / 4, @params.Height - Config.PlayerHeight - 40, new PlayerInput ());
-		bot = new Player(@params.Width * 3 / 4 - Config.PlayerWidth, 40, new BotInput ());
+		player = new Player(@params.Width / 4, @params.Height - Config.PlayerHeight - 50, new PlayerInput ());
+		bot = new Player(@params.Width * 3 / 4 - Config.PlayerWidth, 50, new BotInput ());
 		
 		CreateObject(player, player);
 		CreateObject(bot, bot);
@@ -54,14 +54,14 @@ internal class Game
 			DrawObjects ();
 			UpdateObjects ();
 			
-			if (CheckCollision(ball.Shape, player.Shape))
+			if (CheckCollision(ball.Shape, player.Shape)) // Player
 			{
 				ball.Velocity.Y = -ball.Velocity.Y;
 				ball.Position.Y = player.Position.Y - ball.radius;
 				ball.Velocity.X = (ball.Position.X - player.Position.X) / 10;
 			}
 
-			if (CheckCollision(ball.Shape, bot.Shape))
+			if (CheckCollision(ball.Shape, bot.Shape)) // Bot
 			{
 				ball.Velocity.Y = -ball.Velocity.Y;
 				ball.Position.Y = bot.Position.Y + Config.PlayerHeight + ball.radius;
